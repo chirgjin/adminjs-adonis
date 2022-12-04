@@ -47,6 +47,7 @@
     "@poppinss/dev-utils": "^2.0.3",
     "@trivago/prettier-plugin-sort-imports": "^2.0.0",
     "@types/node": "^18.11.10",
+    "@types/sinon": "^10.0.13",
     "adminjs": "^6.7.0",
     "c8": "^7.12.0",
     "conventional-changelog-cli": "^2.2.2",
@@ -60,6 +61,7 @@
     "mrm": "^4.1.13",
     "prettier": "^2.8.0",
     "reflect-metadata": "^0.1.13",
+    "sinon": "^15.0.0",
     "sqlite3": "^5.1.2",
     "typescript": "^4.9.3"
   },
