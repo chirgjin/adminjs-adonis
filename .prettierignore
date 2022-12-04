@@ -1,0 +1,7 @@
+build
+docs
+*.md
+config.json
+*.html
+*.txt
+coverage

@@ -1,0 +1,18 @@
+{
+    "trailingComma": "es5",
+    "semi": false,
+    "singleQuote": true,
+    "useTabs": false,
+    "quoteProps": "consistent",
+    "bracketSpacing": true,
+    "arrowParens": "always",
+    "printWidth": 80,
+    "tabWidth": 4,
+    "endOfLine": "auto",
+    "importOrder": [
+        "^@ioc:",
+        "^(App|Providers|Config|Contracts|Database)/",
+        "^\\./"
+    ],
+    "importOrderSeparation": true
+}

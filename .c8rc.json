@@ -1,0 +1,5 @@
+{
+    "all": true,
+    "include": ["src/*.ts", "providers/*.ts"],
+    "reporter": ["html", "text"]
+}

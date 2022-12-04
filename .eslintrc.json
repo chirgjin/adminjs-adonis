@@ -1,0 +1,56 @@
+{
+    "extends": ["plugin:adonis/typescriptPackage", "prettier"],
+    "plugins": ["prettier", "import"],
+    "rules": {
+        "prettier/prettier": ["error"],
+        "import/newline-after-import": ["error", { "count": 1 }],
+        "prefer-const": "error",
+        "no-var": "error",
+        "no-new-object": "error",
+        "object-shorthand": "error",
+        "prefer-object-spread": "error",
+        "prefer-template": "error",
+        "no-useless-escape": "error",
+        "no-loop-func": "error",
+        "prefer-rest-params": "warn",
+        "no-new-func": "error",
+        "no-param-reassign": "error",
+        "prefer-arrow-callback": "error",
+        "no-duplicate-imports": "error",
+        "import/first": "error",
+        "nonblock-statement-body-position": "error",
+        "eol-last": "error",
+        "no-multiple-empty-lines": "error",
+        "no-trailing-spaces": "error",
+        "no-unused-vars": [
+            "error",
+            {
+                "varsIgnorePattern": "^_",
+                "argsIgnorePattern": "^_"
+            }
+        ],
+        "padding-line-between-statements": [
+            "error",
+            {
+                "blankLine": "always",
+                "prev": "*",
+                "next": ["block", "return"]
+            },
+            {
+                "blankLine": "always",
+                "prev": "block",
+                "next": "*"
+            },
+            {
+                "blankLine": "always",
+                "prev": "*",
+                "next": "block-like"
+            },
+            {
+                "blankLine": "always",
+                "prev": "block-like",
+                "next": "*"
+            }
+        ]
+    }
+}
