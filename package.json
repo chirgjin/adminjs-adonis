@@ -59,6 +59,7 @@
     "husky": "^8.0.2",
     "lint-staged": "^13.0.4",
     "mrm": "^4.1.13",
+    "node-mocks-http": "^1.12.1",
     "prettier": "^2.8.0",
     "reflect-metadata": "^0.1.13",
     "sinon": "^15.0.0",
