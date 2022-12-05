@@ -1,0 +1,1 @@
+/// <reference path="./decorator.ts" />
