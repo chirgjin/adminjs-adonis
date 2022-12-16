@@ -1,11 +1,11 @@
 import { getAdminColumnOptions } from '.'
-import { enumKeys, ValueOf } from '../helpers'
+import { enumKeys } from '../helpers'
 import { inject } from '@adonisjs/core/build/standalone'
 import { BaseProperty, PropertyType } from 'adminjs'
 import { DateTime } from 'luxon'
 import 'reflect-metadata'
 
-import type { AdminColumnOptions } from '@ioc:Adonis/Addons/AdminJS'
+import type { AdminColumnOptions, ValueOf } from '@ioc:Adonis/Addons/AdminJS'
 import type {
     BelongsToRelationContract,
     LucidModel,

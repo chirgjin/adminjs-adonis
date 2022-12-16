@@ -1,5 +1,6 @@
 declare module '@ioc:Adonis/Addons/AdminJS' {
     import { PropertyType } from 'adminjs'
+    import { LucidRow } from '@ioc:Adonis/Lucid/Orm'
 
     export type AdminColumnOptions = {
         /**
@@ -40,4 +41,8 @@ declare module '@ioc:Adonis/Addons/AdminJS' {
          */
         optional: boolean
     }
+
+    export function adminColumn(
+        options: Partial<AdminColumnOptions>
+    ): (target: LucidRow, property: string) => void
 }

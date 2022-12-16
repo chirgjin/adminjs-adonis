@@ -1,7 +1,4 @@
-/**
- * Type to get union of type of values of an object or array
- */
-export type ValueOf<T> = T extends object | any[] ? T[keyof T] : never
+import { ValueOf } from '@ioc:Adonis/Addons/AdminJS'
 
 // When the value of an enum key is a number then a reverse mapping is created i.e
 // if enum has MY_VALUE=1, then 1=MY_VALUE will also exist but if enum has MY_VALUE='L'
