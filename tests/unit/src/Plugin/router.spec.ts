@@ -1,8 +1,4 @@
-import {
-    createRouteHandler,
-    createAssetHandler,
-    buildRoutes,
-} from '../../../../src/Plugin/router'
+import { Router } from '../../../../src/Plugin/router'
 import { test } from '@japa/runner'
 import AdminJS, { RouterType } from 'adminjs'
 import httpMocks from 'node-mocks-http'
@@ -46,14 +42,21 @@ test.group('Router | createRouteHandler', (group) => {
 
     test('controller is called and adequate response is sent', async ({
         assert,
+        application,
     }) => {
+        const router = application.container.make(Router, [
+            admin,
+            {
+                enabled: true,
+            },
+        ])
         const actionStub = sinon
             .stub(route.Controller.prototype, 'test')
             .returns('Sample HTML Text')
         const responseHeaderSpy = sinon.spy(ctx.response, 'header')
         const responseSendSpy = sinon.spy(ctx.response, 'send')
 
-        const handler = createRouteHandler(admin, route)
+        const handler = router.createRouteHandler(route)
 
         assert.isFunction(handler)
 
@@ -73,21 +76,32 @@ test.group('Router | createAssetHandler', (group) => {
         path: '/',
         src: 'abc.txt',
     }
+    let admin: AdminJS
 
     group.each.setup(() => {
         ctx = group.application.container
             .use('Adonis/Core/HttpContext')
             .create('/', {})
+        admin = new AdminJS()
     })
 
     group.each.teardown(() => {
         sinon.restore()
     })
 
-    test('controller is called and file is sent', async ({ assert }) => {
+    test('controller is called and file is sent', async ({
+        assert,
+        application,
+    }) => {
         const spy = sinon.spy(ctx.response, 'download')
+        const router = application.container.make(Router, [
+            admin,
+            {
+                enabled: true,
+            },
+        ])
 
-        const handler = createAssetHandler(asset)
+        const handler = router.createAssetHandler(asset)
 
         assert.isFunction(handler)
 
@@ -108,16 +122,16 @@ test.group('Router | buildRoutes', (group) => {
     }) => {
         const Route = application.container.use('Adonis/Core/Route')
         const admin = new AdminJS()
-
-        const groupStub = sinon.stub(Route, 'group')
-
-        buildRoutes(
+        const router = application.container.make(Router, [
             admin,
             {
                 enabled: false,
             },
-            Route
-        )
+        ])
+
+        const groupStub = sinon.stub(Route, 'group')
+
+        router.buildRoutes()
 
         assert.isFalse(groupStub.called)
     })
@@ -143,8 +157,9 @@ test.group('Router | buildRoutes', (group) => {
             routePrefix: '/admin123',
             middlewares: ['abc123'],
         }
+        const router = application.container.make(Router, [admin, config])
 
-        buildRoutes(admin, config, Route)
+        router.buildRoutes()
 
         assert.isTrue(groupStub.calledOnce)
         assert.isTrue(prefixStub.calledOnceWith(config.routePrefix))
