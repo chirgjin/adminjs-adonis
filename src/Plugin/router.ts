@@ -1,7 +1,7 @@
 import { inject } from '@adonisjs/core/build/standalone'
 import AdminJS, { Router as AdminRouter, RouterType } from 'adminjs'
 
-import type { RouterConfig } from '@ioc:Adonis/Addons/AdminJS'
+import type { PluginConfig } from '@ioc:Adonis/Addons/AdminJS'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import type { RouterContract } from '@ioc:Adonis/Core/Route'
 
@@ -9,7 +9,7 @@ import type { RouterContract } from '@ioc:Adonis/Core/Route'
 export class Router {
     constructor(
         protected admin: AdminJS,
-        protected config: RouterConfig,
+        protected config: PluginConfig,
         private route: RouterContract
     ) {}
 
