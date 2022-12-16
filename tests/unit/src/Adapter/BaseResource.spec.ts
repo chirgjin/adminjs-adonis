@@ -1,4 +1,4 @@
-import { Resource } from '../../../../src/Adapter/Resource'
+import { BaseResource } from '../../../../src/Adapter/BaseResource'
 import { test } from '@japa/runner'
 import { Filter, ValidationError } from 'adminjs'
 import { DateTime } from 'luxon'
@@ -12,7 +12,7 @@ test.group('Resource | properties', (group) => {
         application,
         models,
     }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const stub = sinon.stub(resource, 'property').returns(null)
 
         const properties = resource.properties()
@@ -44,7 +44,7 @@ test.group('Resource | property', (group) => {
         application,
         models,
     }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const stub = sinon.stub(propertyImport, 'Property')
 
         assert.isNotNull(resource.property('id')) // should return a functionStub
@@ -56,7 +56,7 @@ test.group('Resource | property', (group) => {
         application,
         models,
     }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const stub = sinon.stub(propertyImport, 'Property').returns(-1)
 
         assert.strictEqual(resource.property('abc'), null)
@@ -113,7 +113,7 @@ test.group('Resource | applyFilter', (group) => {
         }
 
         sinon.replace(propertyImport, 'Property', FakeProperty)
-        const resource = application.container.make(Resource, [User])
+        const resource = application.container.make(BaseResource, [User])
         const query = models.User.query()
         const filter = new Filter(
             {
@@ -186,7 +186,7 @@ test.group('Resource | applyFilter', (group) => {
         }
 
         sinon.replace(propertyImport, 'Property', FakeProperty)
-        const resource = application.container.make(Resource, [User])
+        const resource = application.container.make(BaseResource, [User])
         const query = models.User.query()
         const filter = new Filter(
             {
@@ -224,7 +224,7 @@ test.group('Resource | count', (group) => {
         application,
         models,
     }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const ModelQueryBuilder: any = application.container.use(
             'Adonis/Lucid/Database'
         ).ModelQueryBuilder
@@ -261,7 +261,7 @@ test.group('Resource | find', (group) => {
         application,
         models,
     }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const user = new models.User()
         const ModelQueryBuilder: any = application.container.use(
             'Adonis/Lucid/Database'
@@ -312,7 +312,7 @@ test.group('Resource | find', (group) => {
         application,
         models,
     }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const user = new models.User()
         const ModelQueryBuilder: any = application.container.use(
             'Adonis/Lucid/Database'
@@ -360,7 +360,7 @@ test.group('Resource | findOne', (group) => {
         application,
         models,
     }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const user = new models.User()
         const findStub = sinon
             .stub(models.User, 'find')
@@ -379,7 +379,7 @@ test.group('Resource | findOne', (group) => {
         application,
         models,
     }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const findStub = sinon
             .stub(models.User, 'find')
             .returns(Promise.resolve(null))
@@ -397,7 +397,7 @@ test.group('Resource | findMany', (group) => {
     group.each.teardown(() => sinon.restore())
 
     test('returns correct objects', async ({ assert, application, models }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const user = new models.User()
         const ModelQueryBuilder: any = application.container.use(
             'Adonis/Lucid/Database'
@@ -452,7 +452,7 @@ test.group('Resource | sanitizeParams', (group) => {
                 enum: UserType,
             },
         }
-        const resource = application.container.make(Resource, [User])
+        const resource = application.container.make(BaseResource, [User])
         const params = {
             id: 1,
             type: 1,
@@ -508,7 +508,7 @@ test.group('Resource | validateParams', (group) => {
 
         sinon.replace(propertyImport, 'Property', FakeProperty)
 
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const params = {
             id: 1,
             createdAt: DateTime.local().toISO(),
@@ -549,7 +549,7 @@ test.group('Resource | validateParams', (group) => {
 
         sinon.replace(propertyImport, 'Property', FakeProperty)
 
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const params = {
             id: 'some-random-string',
             createdAt: 'invalid-date',
@@ -574,7 +574,7 @@ test.group('Resource | create', (group) => {
         models,
         application,
     }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const user = new models.User()
 
         const params = {
@@ -613,7 +613,7 @@ test.group('Resource | update', (group) => {
         models,
         application,
     }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const user = new models.User()
 
         const params = {
@@ -658,7 +658,7 @@ test.group('Resource | delete', (group) => {
         models,
         application,
     }) => {
-        const resource = application.container.make(Resource, [models.User])
+        const resource = application.container.make(BaseResource, [models.User])
         const user = new models.User()
 
         const findStub = sinon
