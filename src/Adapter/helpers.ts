@@ -24,6 +24,10 @@ export function getAdminColumnOptions(model: LucidModel, columnKey: string) {
         unique: providedOptions?.unique ?? columnOptions.isPrimary,
         enum: providedOptions?.enum,
         sortable: providedOptions?.sortable || false,
-        optional: providedOptions?.optional || false,
+        optional:
+            providedOptions?.optional ??
+            (columnOptions.meta?.autoCreate ||
+                columnOptions.meta?.autoCreate || // if autoCreate/autoUpdate is true then this is optional
+                false),
     } as AdminColumnOptions
 }
