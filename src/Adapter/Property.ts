@@ -35,9 +35,9 @@ export class Property extends BaseProperty {
         null
 
     constructor(
-        private model: LucidModel,
-        private columnKey: string,
-        private validator: typeof import('@ioc:Adonis/Core/Validator')
+        protected model: LucidModel,
+        protected columnKey: string,
+        protected validator: typeof import('@ioc:Adonis/Core/Validator')
     ) {
         const columnOptions = getAdminColumnOptions(model, columnKey)
 
