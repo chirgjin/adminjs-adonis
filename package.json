@@ -76,7 +76,15 @@
         "types": "adminjs-adonis",
         "providers": [
             "adminjs-adonis"
-        ]
+        ],
+        "templates": {
+            "config": [
+                {
+                    "src": "config.txt",
+                    "dest": "adminjs"
+                }
+            ]
+        }
     },
     "typings": "./build/adonis-typings/index.d.ts",
     "lint-staged": {

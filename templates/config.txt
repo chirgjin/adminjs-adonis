@@ -1,0 +1,13 @@
+import { AdminConfig } from '@ioc:Adonis/Addons/AdminJS'
+
+export const config: AdminConfig = {
+    plugin: {
+        enabled: true,
+        routePrefix: '/admin',
+    },
+    adapter: {
+        enabled: true,
+    },
+}
+
+export default config
