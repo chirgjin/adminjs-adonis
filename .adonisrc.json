@@ -1,4 +1,10 @@
 {
     "typescript": true,
-    "aliases": {}
+    "aliases": {},
+    "metaFiles": [
+        {
+            "pattern": "templates/*.txt",
+            "reloadServer": false
+        }
+    ]
 }

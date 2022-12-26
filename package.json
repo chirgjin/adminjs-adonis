@@ -69,7 +69,8 @@
     "files": [
         "build/src",
         "build/providers",
-        "build/adonis-typings"
+        "build/adonis-typings",
+        "build/templates"
     ],
     "mrmConfig": {},
     "adonisjs": {
