@@ -27,7 +27,8 @@ export function getAdminColumnOptions(model: LucidModel, columnKey: string) {
         optional:
             providedOptions?.optional ??
             (columnOptions.meta?.autoCreate ||
-                columnOptions.meta?.autoCreate || // if autoCreate/autoUpdate is true then this is optional
+                columnOptions.meta?.autoUpdate || // if autoCreate/autoUpdate is true then this is optional
                 false),
+        serialize: providedOptions?.serialize,
     } as AdminColumnOptions
 }
