@@ -7,7 +7,7 @@
         "baseUrl": ".",
         "rootDir": "./",
         "outDir": "build",
-        "sourceMap": true,
+        "sourceMap": false,
         "paths": {},
         "types": ["@adonisjs/core", "@adonisjs/lucid"]
     },
