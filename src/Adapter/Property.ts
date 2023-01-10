@@ -1,4 +1,4 @@
-import { enumKeys } from '../helpers'
+import { enumKeys, getEnumValue } from '../helpers'
 import { inject } from '@adonisjs/core/build/standalone'
 import { BaseProperty, PropertyType } from 'adminjs'
 import { DateTime } from 'luxon'
@@ -9,6 +9,7 @@ import type { FileValidationOptions } from '@ioc:Adonis/Core/BodyParser'
 import type {
     BelongsToRelationContract,
     LucidModel,
+    LucidRow,
 } from '@ioc:Adonis/Lucid/Orm'
 
 import { getAdminColumnOptions } from './helpers'
@@ -260,5 +261,41 @@ export class Property extends BaseProperty {
             default:
                 return this.withNullable(this.validator.schema.string)
         }
+    }
+
+    /**
+     * Helper function to serialize this property for a given row.
+     * If serialize method is defined then it is used.
+     * If value is DateTime then it is converted to ISO format
+     * if value is enum then a corresponding string to that enum is generated
+     * If value is attachment then url is returned for that attachment
+     * otherwise, value itself is returned
+     */
+    public async serialize(row: LucidRow) {
+        let value = row[this.path()]
+
+        if (this.columnOptions.serialize) {
+            return await this.columnOptions.serialize(value, this.path(), row)
+        }
+
+        if (value === null || value === undefined) {
+            return value
+        }
+
+        if (DateTime.isDateTime(value)) {
+            return this.type() === 'date' ? value.toISODate() : value.toISO()
+        }
+
+        if (this.columnOptions.enum) {
+            value = getEnumValue(this.columnOptions.enum, value)
+
+            return typeof value === 'string' ? value.toLowerCase() : value
+        }
+
+        if (this.isAttachment) {
+            return value.url
+        }
+
+        return value
     }
 }
