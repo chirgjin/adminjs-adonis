@@ -10,26 +10,37 @@ export default class AppProvider {
     private extractModels(list: any[] | Record<any, any>) {
         const { BaseModel } = this.app.container.use('Adonis/Lucid/Orm')
 
-        return Object.values(list).reduce((models, model) => {
-            if (model.prototype instanceof BaseModel) {
-                models.push(model)
-            } else if (typeof model === 'object' && model) {
-                models.push(...this.extractModels(model))
-            }
+        return Object.values(list).reduce(
+            (models: Set<typeof BaseModel>, model) => {
+                if (
+                    typeof model === 'function' &&
+                    model.prototype instanceof BaseModel
+                ) {
+                    models.add(model)
+                } else if (typeof model === 'object' && model) {
+                    this.extractModels(model).forEach((value) =>
+                        models.add(value)
+                    )
+                }
 
-            return models
-        }, []) as Array<typeof BaseModel>
+                return models
+            },
+            new Set()
+        ) as Set<typeof BaseModel>
     }
 
     private loadModels() {
         const { requireAll } = this.app.container.use('Adonis/Core/Helpers')
 
-        return this.extractModels(
-            requireAll(
-                this.app.makePath(
-                    this.app.resolveNamespaceDirectory('models') || 'app/Models'
-                )
-            )!
+        return Array.from(
+            this.extractModels(
+                requireAll(
+                    this.app.makePath(
+                        this.app.resolveNamespaceDirectory('models') ||
+                            'app/Models'
+                    )
+                )!
+            )
         )
     }
 
@@ -83,6 +94,11 @@ export default class AppProvider {
 
                     if (!options.databases) {
                         options.databases = ['lucid']
+                    }
+
+                    if (!options.componentLoader) {
+                        options.componentLoader =
+                            require('../src/Adapter/Components').componentLoader
                     }
                 }
 
