@@ -1,3 +1,12 @@
+## <small>1.1.1 (2023-01-10)</small>
+
+* fix: disable source maps ([87004e2](https://github.com/chirgjin/adminjs-adonis/commit/87004e2))
+* fix: path to file input ([661f761](https://github.com/chirgjin/adminjs-adonis/commit/661f761))
+* refactor: rename AppProvider to AdminProvider ([64f951a](https://github.com/chirgjin/adminjs-adonis/commit/64f951a))
+* docs: changelog ([3f43c07](https://github.com/chirgjin/adminjs-adonis/commit/3f43c07))
+
+
+
 ## 1.1.0 (2023-01-10)
 
 * fix: make primary key optional during validation ([baccbc0](https://github.com/chirgjin/adminjs-adonis/commit/baccbc0))
