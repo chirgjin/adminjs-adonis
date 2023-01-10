@@ -1,3 +1,31 @@
+## 1.1.0 (2023-01-10)
+
+* fix: make primary key optional during validation ([baccbc0](https://github.com/chirgjin/adminjs-adonis/commit/baccbc0))
+* fix: use Set instead of array to avoid duplicate models ([8fc0420](https://github.com/chirgjin/adminjs-adonis/commit/8fc0420))
+* docs: add comments & explanations to config ([a337f70](https://github.com/chirgjin/adminjs-adonis/commit/a337f70))
+* docs: add example for model hooks ([19e6a17](https://github.com/chirgjin/adminjs-adonis/commit/19e6a17))
+* docs: documentation for adminjs-adonis ([b6a729d](https://github.com/chirgjin/adminjs-adonis/commit/b6a729d))
+* docs: update changelog ([475b06b](https://github.com/chirgjin/adminjs-adonis/commit/475b06b))
+* docs(fix): changelog ([f376e72](https://github.com/chirgjin/adminjs-adonis/commit/f376e72))
+* style: add empty line at EOF ([6224d41](https://github.com/chirgjin/adminjs-adonis/commit/6224d41))
+* test(fix): helpers.getAdminColumnOptions ([62c90b1](https://github.com/chirgjin/adminjs-adonis/commit/62c90b1))
+* test(fix): update test cases ([1c3fd0e](https://github.com/chirgjin/adminjs-adonis/commit/1c3fd0e))
+* feat: add support for custom serialization ([f73da62](https://github.com/chirgjin/adminjs-adonis/commit/f73da62))
+* feat: add support for file attachments in resource ([5d9d097](https://github.com/chirgjin/adminjs-adonis/commit/5d9d097))
+* feat: add support for file in property ([9d0f3af](https://github.com/chirgjin/adminjs-adonis/commit/9d0f3af))
+* feat: add support for file values in record ([491dcf8](https://github.com/chirgjin/adminjs-adonis/commit/491dcf8))
+* feat: add support for serialize in admin options ([1f64b70](https://github.com/chirgjin/adminjs-adonis/commit/1f64b70))
+* feat: create loader for custom components ([5e1faec](https://github.com/chirgjin/adminjs-adonis/commit/5e1faec))
+* feat: execute hooks & serialization in base resource ([8814ce9](https://github.com/chirgjin/adminjs-adonis/commit/8814ce9))
+* feat: file input component ([e0e1a41](https://github.com/chirgjin/adminjs-adonis/commit/e0e1a41))
+* feat: hook decorators ([692232e](https://github.com/chirgjin/adminjs-adonis/commit/692232e))
+* feat: list url component ([7441518](https://github.com/chirgjin/adminjs-adonis/commit/7441518))
+* feat: show url component ([593e6c1](https://github.com/chirgjin/adminjs-adonis/commit/593e6c1))
+* feat: typings for admin hooks ([fc1e0f2](https://github.com/chirgjin/adminjs-adonis/commit/fc1e0f2))
+* chore: copy jsx templates during build ([99e2d59](https://github.com/chirgjin/adminjs-adonis/commit/99e2d59))
+
+
+
 ## <small>1.0.1 (2022-12-26)</small>
 
 * fix: add templates to build ([44bbe85](https://github.com/chirgjin/adminjs-adonis/commit/44bbe85))
