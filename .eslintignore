@@ -1,3 +1,4 @@
 build
 .eslintrc.js
 coverage
+*.jsx
