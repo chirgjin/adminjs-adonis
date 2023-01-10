@@ -1,6 +1,6 @@
 {
     "name": "adminjs-adonis",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "description": "AdonisJS plugin & adapter for AdminJS",
     "main": "build/providers/AdminProvider.js",
     "scripts": {
