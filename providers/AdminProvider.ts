@@ -4,7 +4,7 @@ import AdminJS, { AdminJSOptions } from 'adminjs'
 import { AdminConfig } from '@ioc:Adonis/Addons/AdminJS'
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 
-export default class AppProvider {
+export default class AdminProvider {
     constructor(protected app: ApplicationContract) {}
 
     private extractModels(list: any[] | Record<any, any>) {
