@@ -32,15 +32,15 @@ For this purpose, there is a `@adminColumn` decorator which you can use to infor
 
 ```ts
 // User.ts
-import { BaseModel, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
 import { adminColumn } from '@ioc:Adonis/Addons/AdminJS'
 
-enum UserType {
+export enum UserType {
     STUDENT = 1,
     TEACHER = 2,
 }
 
-class User extends BaseModel {
+export class User extends BaseModel {
     @column({ isPrimary: true })
     public id: number
 
@@ -101,3 +101,30 @@ For example: when user is creating a new object, then the order of hooks is:
 
 Note: There is no `beforeSave` or `afterSave` hook in this package
 
+Example:
+```ts
+// User.ts
+import { beforeCreate, beforeUpdate } from '@ioc:Adonis/Addons/AdminJS'
+import Hash from '@ioc:Adonis/Core/Hash'
+import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+
+export class User extends BaseModel {
+    @column({ isPrimary: true })
+    public id: number
+
+    @column()
+    public username: string
+
+    @column()
+    public password: string
+
+    @beforeCreate()
+    @beforeUpdate()
+    public static async setPasswordIfDirty(instance: User) {
+        if (instance.$dirty.password) {
+            instance.password = await Hash.make(instance.password)
+        }
+    }
+}
+
+```
