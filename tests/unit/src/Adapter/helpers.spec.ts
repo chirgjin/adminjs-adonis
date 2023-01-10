@@ -29,6 +29,7 @@ test.group('helpers | getAdminColumnOptions', () => {
             enum: undefined,
             sortable: false,
             optional: false,
+            serialize: undefined,
         })
     })
 })

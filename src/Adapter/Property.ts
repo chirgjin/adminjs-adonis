@@ -1,15 +1,18 @@
-import { getAdminColumnOptions } from '.'
-import { enumKeys } from '../helpers'
+import { enumKeys, getEnumValue } from '../helpers'
 import { inject } from '@adonisjs/core/build/standalone'
 import { BaseProperty, PropertyType } from 'adminjs'
 import { DateTime } from 'luxon'
 import 'reflect-metadata'
 
 import type { AdminColumnOptions, ValueOf } from '@ioc:Adonis/Addons/AdminJS'
+import type { FileValidationOptions } from '@ioc:Adonis/Core/BodyParser'
 import type {
     BelongsToRelationContract,
     LucidModel,
+    LucidRow,
 } from '@ioc:Adonis/Lucid/Orm'
+
+import { getAdminColumnOptions } from './helpers'
 
 /**
  * Property class to represent 1 column of a model.
@@ -23,7 +26,7 @@ export class Property extends BaseProperty {
     /**
      * Stores computed type so that it isn't computed again
      */
-    private __type: PropertyType
+    private __type: PropertyType | 'file'
     /**
      * Admin column options for the column
      */
@@ -33,6 +36,18 @@ export class Property extends BaseProperty {
      */
     public relation: BelongsToRelationContract<LucidModel, LucidModel> | null =
         null
+    /**
+     * Attachment validation options
+     */
+    public attachmentOptions?: Partial<FileValidationOptions>
+    /**
+     * Whether property is attachment or not. Can't re-use type for this due to inheritance issues
+     */
+    public get isAttachment() {
+        this.type() // compute type
+
+        return this.__type === 'file'
+    }
 
     constructor(
         protected model: LucidModel,
@@ -61,6 +76,10 @@ export class Property extends BaseProperty {
     public type() {
         if (!this.__type) {
             this.__type = this.getType()
+        }
+
+        if (this.__type === 'file') {
+            return 'string'
         }
 
         return this.__type
@@ -176,7 +195,10 @@ export class Property extends BaseProperty {
             >
         >
     >(node: T, ...args: Parameters<T>): ReturnType<T> {
-        if (this.columnOptions.optional) {
+        if (
+            this.columnOptions.optional ||
+            this.path() === this.model.primaryKey // primary key is usually auto-generated
+        ) {
             return node.nullableAndOptional.call(null, ...args)
         } else return node.call(null, ...args)
     }
@@ -201,6 +223,11 @@ export class Property extends BaseProperty {
             return this.withNullable(
                 this.validator.schema.enum,
                 this.availableValues()!
+            )
+        } else if (this.isAttachment) {
+            return this.withNullable(
+                this.validator.schema.file,
+                this.attachmentOptions
             )
         }
 
@@ -234,5 +261,41 @@ export class Property extends BaseProperty {
             default:
                 return this.withNullable(this.validator.schema.string)
         }
+    }
+
+    /**
+     * Helper function to serialize this property for a given row.
+     * If serialize method is defined then it is used.
+     * If value is DateTime then it is converted to ISO format
+     * if value is enum then a corresponding string to that enum is generated
+     * If value is attachment then url is returned for that attachment
+     * otherwise, value itself is returned
+     */
+    public async serialize(row: LucidRow) {
+        let value = row[this.path()]
+
+        if (this.columnOptions.serialize) {
+            return await this.columnOptions.serialize(value, this.path(), row)
+        }
+
+        if (value === null || value === undefined) {
+            return value
+        }
+
+        if (DateTime.isDateTime(value)) {
+            return this.type() === 'date' ? value.toISODate() : value.toISO()
+        }
+
+        if (this.columnOptions.enum) {
+            value = getEnumValue(this.columnOptions.enum, value)
+
+            return typeof value === 'string' ? value.toLowerCase() : value
+        }
+
+        if (this.isAttachment) {
+            return value.url
+        }
+
+        return value
     }
 }

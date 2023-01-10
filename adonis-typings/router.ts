@@ -4,16 +4,31 @@ declare module '@ioc:Adonis/Addons/AdminJS' {
     import type { RouterContract } from '@ioc:Adonis/Core/Route'
 
     /**
-     * Config for router plugin
+     * Config for AdminJS router plugin
+     * It handles on which route your admin panel is present.
+     * You can also provide middlewares to it for authentication.
+     *
+     * If you disable plugin then you'll have to manually handle the routing
      */
     export type PluginConfig =
         | {
-              // if disabled you'll have to manually register the routes
+              /**
+               * Whether to enable plugin or not
+               */
               enabled: false
           }
         | {
+              /**
+               * Whether to enable plugin or not
+               */
               enabled: true
+              /**
+               * Base route on which your admin panel resides.
+               */
               routePrefix?: string
+              /**
+               * Middlewares which are applied on all the routes of admin panel
+               */
               middlewares?: string[]
           }
 

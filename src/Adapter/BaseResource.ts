@@ -1,4 +1,3 @@
-import { LucidRecord, Property } from '.'
 import { getEnumValue } from '../helpers'
 import { inject } from '@adonisjs/core/build/standalone'
 import {
@@ -7,16 +6,22 @@ import {
     Filter,
     ParamsType,
     PropertyErrors,
+    ResourceOptions,
     ValidationError,
 } from 'adminjs'
-import { DateTime } from 'luxon'
+import AdminJS from 'adminjs/types/src'
 import Validator from 'validator'
 
 import type { TypedSchema } from '@ioc:Adonis/Core/Validator'
 import type {
     LucidModel,
+    LucidRow,
     ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
+
+import { components } from './Components'
+import { Property } from './Property'
+import { LucidRecord } from './Record'
 
 /**
  * Resource adapter for AdminJS
@@ -175,20 +180,38 @@ export class BaseResource extends BaseAdminResource {
             )
         }
 
-        return (await query).map((obj) => this.build(obj.$attributes))
+        await this.model.$hooks.exec('before', 'adminFetch', query)
+
+        const data = await query
+
+        await this.model.$hooks.exec('after', 'adminFetch', data)
+
+        const objects: LucidRecord[] = []
+
+        for (const obj of data) {
+            objects.push(this.build(await this.sanitizeParams(obj)))
+        }
+
+        return objects
     }
 
     /**
      * Returns object matching the given resource id
      */
     public async findOne(id: string) {
-        const obj = await this.model.find(id)
+        const query = this.model.query().where(this.model.primaryKey, id)
+
+        await this.model.$hooks.exec('before', 'adminFind', query)
+
+        const obj = await query.first()
 
         if (!obj) {
             return null
         }
 
-        return this.build(obj.$attributes)
+        await this.model.$hooks.exec('after', 'adminFind', obj)
+
+        return this.build(await this.sanitizeParams(obj))
     }
 
     /**
@@ -197,36 +220,35 @@ export class BaseResource extends BaseAdminResource {
      * @returns
      */
     public async findMany(ids: (string | number)[]) {
-        const objects = await this.model
-            .query()
-            .whereIn(this.model.primaryKey, ids)
+        const query = this.model.query().whereIn(this.model.primaryKey, ids)
 
-        return objects.map((obj) => this.build(obj.$attributes))
+        await this.model.$hooks.exec('before', 'adminFetch', query)
+
+        const data = await query
+
+        await this.model.$hooks.exec('after', 'adminFetch', data)
+
+        const objects: LucidRecord[] = []
+
+        for (const obj of data) {
+            objects.push(this.build(await this.sanitizeParams(obj)))
+        }
+
+        return objects
     }
 
     /**
      * Sanitizes parameters so that they can be passed to {@link LucidRecord}
      */
-    public sanitizeParams(params: Record<string, any>) {
+    public async sanitizeParams(row: LucidRow) {
         const data: Record<string, any> = {}
 
-        for (const key in params) {
-            let value = params[key]
-            const property = this.property(key)
-
-            if (DateTime.isDateTime(value)) {
-                value =
-                    this.property(key)?.type() === 'date'
-                        ? value.toISODate()
-                        : value.toISO()
-            } else if (property?.columnOptions.enum) {
-                value = getEnumValue(
-                    property.columnOptions.enum,
-                    value
-                ).toLowerCase()
+        for (const property of this.properties()) {
+            if (!property.isEditable() && !property.isVisible()) {
+                continue
             }
 
-            data[key] = value
+            data[property.path()] = await property.serialize(row)
         }
 
         return data
@@ -236,7 +258,7 @@ export class BaseResource extends BaseAdminResource {
      * Helper to build {@link LucidRecord} from params
      */
     public build(params: Record<string, any>): LucidRecord {
-        return new LucidRecord(this.sanitizeParams(params), this)
+        return new LucidRecord(params, this)
     }
 
     /**
@@ -250,8 +272,10 @@ export class BaseResource extends BaseAdminResource {
 
         const validatorSchema = this.validator.schema.create(
             this.properties().reduce((acc, property) => {
-                acc[property.path()] = property.getSchemaType()
-                propertyHash[property.path()] = property
+                if (property.isEditable()) {
+                    acc[property.path()] = property.getSchemaType()
+                    propertyHash[property.path()] = property
+                }
 
                 return acc
             }, {} as TypedSchema)
@@ -301,9 +325,15 @@ export class BaseResource extends BaseAdminResource {
      */
     public async create(params: Record<string, any>): Promise<ParamsType> {
         const data = await this.validateParams(params)
-        const object = await this.model.create(data)
+        const object = new this.model().fill(data)
 
-        return this.sanitizeParams(object.$attributes)
+        await this.model.$hooks.exec('before', 'adminCreate', object)
+
+        await object.save()
+
+        await this.model.$hooks.exec('after', 'adminCreate', object)
+
+        return await this.sanitizeParams(object)
     }
 
     /**
@@ -314,10 +344,15 @@ export class BaseResource extends BaseAdminResource {
         params: Record<string, any>
     ): Promise<ParamsType> {
         const object = await this.model.findOrFail(id)
+        object.merge(await this.validateParams(params))
 
-        await object.merge(await this.validateParams(params)).save()
+        await this.model.$hooks.exec('before', 'adminUpdate', object)
 
-        return this.sanitizeParams(object.$attributes)
+        await object.save()
+
+        await this.model.$hooks.exec('after', 'adminUpdate', object)
+
+        return await this.sanitizeParams(object)
     }
 
     /**
@@ -326,6 +361,49 @@ export class BaseResource extends BaseAdminResource {
     public async delete(id: string | number) {
         const object = await this.model.find(id)
 
+        await this.model.$hooks.exec('before', 'adminDelete', object)
+
         await object?.delete()
+
+        await this.model.$hooks.exec('after', 'adminDelete', object)
+    }
+
+    /**
+     * Helper used internally by adminjs to assign decorator to this resource.
+     * In order to add support for file attachments, we update the options property
+     * to override the components which are rendered so that proper file in displayed
+     */
+    public assignDecorator(
+        admin: AdminJS,
+        options?: ResourceOptions | undefined
+    ): void {
+        const finalOptions: ResourceOptions = options || {}
+
+        finalOptions.properties = finalOptions.properties || {}
+
+        for (const property of this.properties()) {
+            if (
+                property.isAttachment &&
+                !finalOptions.properties[property.path()]
+            ) {
+                finalOptions.properties[property.path()] = {
+                    components: {
+                        edit: components.FileInput,
+                        list: components.ListUrl,
+                        show: components.ShowUrl,
+                    },
+                }
+
+                if (property.attachmentOptions?.extnames) {
+                    finalOptions.properties[property.path()].props = {
+                        accept: property.attachmentOptions?.extnames
+                            .map((ext) => `.${ext}`)
+                            .join(','),
+                    }
+                }
+            }
+        }
+
+        return super.assignDecorator(admin, finalOptions)
     }
 }

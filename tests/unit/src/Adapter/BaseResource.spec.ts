@@ -1,4 +1,5 @@
 import { BaseResource } from '../../../../src/Adapter/BaseResource'
+import { LucidRecord } from '../../../../src/Adapter/Record'
 import { test } from '@japa/runner'
 import { Filter, ValidationError } from 'adminjs'
 import { DateTime } from 'luxon'
@@ -266,6 +267,7 @@ test.group('Resource | find', (group) => {
         const ModelQueryBuilder: any = application.container.use(
             'Adonis/Lucid/Database'
         ).ModelQueryBuilder
+        const record = new LucidRecord({}, resource)
 
         const applyFilterStub = sinon
             .stub(resource, 'applyFilter')
@@ -282,9 +284,10 @@ test.group('Resource | find', (group) => {
         const thenStub = sinon
             .stub(ModelQueryBuilder.prototype, 'exec')
             .returns(Promise.resolve([user]))
-        const buildStub = sinon.stub(resource, 'build').returns({
-            fake: true,
-        })
+        const buildStub = sinon.stub(resource, 'build').returns(record)
+        const sanitizeStub = sinon
+            .stub(resource, 'sanitizeParams')
+            .returns(Promise.resolve({}))
 
         const filter = new Filter({}, resource)
         const data = await resource.find(filter, {
@@ -298,13 +301,14 @@ test.group('Resource | find', (group) => {
 
         assert.isArray(data)
         assert.lengthOf(data, 1)
-        assert.deepEqual(data, [{ fake: true }])
+        assert.deepEqual(data, [record])
         assert.isTrue(applyFilterStub.calledOnceWith(sinon.match.any, filter))
         assert.isTrue(limitStub.calledOnceWith(2))
         assert.isTrue(offsetStub.calledOnceWith(1))
         assert.isTrue(orderByStub.calledOnceWith('username', 'asc'))
         assert.isTrue(thenStub.calledOnce)
-        assert.isTrue(buildStub.calledOnceWith(user.$attributes))
+        assert.isTrue(sanitizeStub.calledOnce)
+        assert.isTrue(buildStub.calledOnce)
     })
 
     test('limit, offset & sortBy are not applied if not passed', async ({
@@ -317,6 +321,7 @@ test.group('Resource | find', (group) => {
         const ModelQueryBuilder: any = application.container.use(
             'Adonis/Lucid/Database'
         ).ModelQueryBuilder
+        const record = new LucidRecord({}, resource)
 
         const applyFilterStub = sinon
             .stub(resource, 'applyFilter')
@@ -333,22 +338,24 @@ test.group('Resource | find', (group) => {
         const thenStub = sinon
             .stub(ModelQueryBuilder.prototype, 'exec')
             .returns(Promise.resolve([user]))
-        const buildStub = sinon.stub(resource, 'build').returns({
-            fake: true,
-        })
+        const buildStub = sinon.stub(resource, 'build').returns(record)
+        const sanitizeStub = sinon
+            .stub(resource, 'sanitizeParams')
+            .returns(Promise.resolve({}))
 
         const filter = new Filter({}, resource)
         const data = await resource.find(filter, {})
 
         assert.isArray(data)
         assert.lengthOf(data, 1)
-        assert.deepEqual(data, [{ fake: true }])
+        assert.deepEqual(data, [record])
         assert.isTrue(applyFilterStub.calledOnceWith(sinon.match.any, filter))
         assert.isFalse(limitStub.called)
         assert.isFalse(offsetStub.called)
         assert.isFalse(orderByStub.called)
         assert.isTrue(thenStub.calledOnce)
-        assert.isTrue(buildStub.calledOnceWith(user.$attributes))
+        assert.isTrue(sanitizeStub.calledOnce)
+        assert.isTrue(buildStub.calledOnce)
     })
 })
 
@@ -361,17 +368,26 @@ test.group('Resource | findOne', (group) => {
         models,
     }) => {
         const resource = application.container.make(BaseResource, [models.User])
+        const ModelQueryBuilder: any = application.container.use(
+            'Adonis/Lucid/Database'
+        ).ModelQueryBuilder
         const user = new models.User()
-        const findStub = sinon
-            .stub(models.User, 'find')
+        const record = new LucidRecord({}, resource)
+
+        const firstStub = sinon
+            .stub(ModelQueryBuilder.prototype, 'first')
             .returns(Promise.resolve(user))
-        const buildStub = sinon.stub(resource, 'build').returnsArg(0)
+        const sanitizeStub = sinon
+            .stub(resource, 'sanitizeParams')
+            .returns(Promise.resolve({}))
+        const buildStub = sinon.stub(resource, 'build').returns(record)
 
         const obj = await resource.findOne('1')
 
-        assert.deepEqual(obj, user.$attributes)
-        assert.isTrue(findStub.calledOnceWith('1'))
-        assert.isTrue(buildStub.calledOnceWith(user.$attributes))
+        assert.deepEqual(obj, record)
+        assert.isTrue(firstStub.calledOnce)
+        assert.isTrue(sanitizeStub.calledOnce)
+        assert.isTrue(buildStub.calledOnce)
     })
 
     test("returns null if object doesn't exist", async ({
@@ -380,16 +396,26 @@ test.group('Resource | findOne', (group) => {
         models,
     }) => {
         const resource = application.container.make(BaseResource, [models.User])
-        const findStub = sinon
-            .stub(models.User, 'find')
+        const ModelQueryBuilder: any = application.container.use(
+            'Adonis/Lucid/Database'
+        ).ModelQueryBuilder
+
+        const firstStub = sinon
+            .stub(ModelQueryBuilder.prototype, 'first')
             .returns(Promise.resolve(null))
-        const buildStub = sinon.stub(resource, 'build').returnsArg(0)
+        const sanitizeStub = sinon
+            .stub(resource, 'sanitizeParams')
+            .returns(Promise.resolve({}))
+        const buildStub = sinon
+            .stub(resource, 'build')
+            .returns(new LucidRecord({}, resource))
 
         const obj = await resource.findOne('1')
 
         assert.isNull(obj)
-        assert.isTrue(findStub.calledOnceWith('1'))
-        assert.isFalse(buildStub.called)
+        assert.isTrue(firstStub.calledOnce)
+        assert.isFalse(sanitizeStub.calledOnce)
+        assert.isFalse(buildStub.calledOnce)
     })
 })
 
@@ -402,6 +428,7 @@ test.group('Resource | findMany', (group) => {
         const ModelQueryBuilder: any = application.container.use(
             'Adonis/Lucid/Database'
         ).ModelQueryBuilder
+        const record = new LucidRecord({}, resource)
 
         const whereInStub = sinon
             .stub(ModelQueryBuilder.prototype, 'whereIn')
@@ -409,17 +436,19 @@ test.group('Resource | findMany', (group) => {
         const thenStub = sinon
             .stub(ModelQueryBuilder.prototype, 'exec')
             .returns(Promise.resolve([user]))
-        const buildStub = sinon.stub(resource, 'build').returns({
-            fake: true,
-        })
+        const buildStub = sinon.stub(resource, 'build').returns(record)
+        const sanitizeStub = sinon
+            .stub(resource, 'sanitizeParams')
+            .returns(Promise.resolve({}))
 
         const data = await resource.findMany([1])
 
         assert.isArray(data)
-        assert.deepEqual(data, [{ fake: true }])
+        assert.deepEqual(data, [record])
         assert.isTrue(whereInStub.calledOnceWith('id', [1]))
         assert.isTrue(thenStub.calledOnce)
-        assert.isTrue(buildStub.calledOnceWith(user.$attributes))
+        assert.isTrue(sanitizeStub.calledOnce)
+        assert.isTrue(buildStub.calledOnce)
     })
 })
 
@@ -441,7 +470,7 @@ test.group('Resource | sanitizeParams', (group) => {
         }
         class User extends UserModel {
             @column()
-            public type: string
+            public type: number
 
             @column.date()
             public birthDate: DateTime
@@ -458,6 +487,8 @@ test.group('Resource | sanitizeParams', (group) => {
             type: 1,
             createdAt: DateTime.local(),
             birthDate: DateTime.local(),
+            username: 'test',
+            password: 'some-secure-hash',
         }
 
         const enumStub = sinon.stub(enumHelpers, 'getEnumValue')
@@ -465,13 +496,15 @@ test.group('Resource | sanitizeParams', (group) => {
         enumStub.withArgs(UserType, UserType.ADMIN).returns('ADMIN')
         enumStub.withArgs(UserType, UserType.USER).returns('USER')
 
-        const data = resource.sanitizeParams(params)
+        const data = await resource.sanitizeParams(new User().fill(params))
 
         assert.deepEqual(data, {
             id: 1,
             type: 'user',
             createdAt: params.createdAt.toISO(),
             birthDate: params.birthDate.toISODate(),
+            username: params.username,
+            password: params.password,
         })
         assert.isTrue(enumStub.calledOnceWith(UserType, 1))
     })
@@ -519,7 +552,7 @@ test.group('Resource | validateParams', (group) => {
         const validatedData = await resource.validateParams(params)
 
         assert.isObject(validatedData)
-        assert.strictEqual(validatedData.id, params.id)
+        assert.strictEqual(validatedData.id, undefined) // id isn't editable because it's the PK & is thus ignored
         assert.strictEqual(validatedData.username, params.username)
         assert.strictEqual(validatedData.password, params.password)
         assert.isTrue(DateTime.isDateTime(validatedData.createdAt))
@@ -575,7 +608,6 @@ test.group('Resource | create', (group) => {
         application,
     }) => {
         const resource = application.container.make(BaseResource, [models.User])
-        const user = new models.User()
 
         const params = {
             id: 1,
@@ -589,19 +621,19 @@ test.group('Resource | create', (group) => {
         const validateParamsStub = sinon
             .stub(resource, 'validateParams')
             .returns(Promise.resolve(params))
-        const createStub = sinon
-            .stub(models.User, 'create')
-            .returns(Promise.resolve(user))
+        const saveStub = sinon
+            .stub(models.User.prototype, 'save')
+            .returns(Promise.resolve(new models.User()))
         const sanitizeStub = sinon
             .stub(resource, 'sanitizeParams')
-            .returns(sanitizedData)
+            .returns(Promise.resolve(sanitizedData))
 
         const data = await resource.create(params)
 
         assert.deepEqual(data, sanitizedData)
         assert.isTrue(validateParamsStub.calledOnceWith(params))
-        assert.isTrue(createStub.calledOnceWith(params))
-        assert.isTrue(sanitizeStub.calledOnceWith(user.$attributes))
+        assert.isTrue(saveStub.calledOnce)
+        assert.isTrue(sanitizeStub.calledOnce)
     })
 })
 
@@ -637,7 +669,7 @@ test.group('Resource | update', (group) => {
             .returns(Promise.resolve(user))
         const sanitizeStub = sinon
             .stub(resource, 'sanitizeParams')
-            .returns(sanitizedData)
+            .returns(Promise.resolve(sanitizedData))
 
         const data = await resource.update(1, params)
 
@@ -646,7 +678,7 @@ test.group('Resource | update', (group) => {
         assert.isTrue(findOrFailStub.calledOnceWith(1))
         assert.isTrue(validateParamsStub.calledOnceWith(params))
         assert.isTrue(saveStub.calledOnce)
-        assert.isTrue(sanitizeStub.calledOnceWith(user.$attributes))
+        assert.isTrue(sanitizeStub.calledOnceWith(user))
     })
 })
 
