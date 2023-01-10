@@ -194,7 +194,10 @@ export class Property extends BaseProperty {
             >
         >
     >(node: T, ...args: Parameters<T>): ReturnType<T> {
-        if (this.columnOptions.optional) {
+        if (
+            this.columnOptions.optional ||
+            this.path() === this.model.primaryKey // primary key is usually auto-generated
+        ) {
             return node.nullableAndOptional.call(null, ...args)
         } else return node.call(null, ...args)
     }
