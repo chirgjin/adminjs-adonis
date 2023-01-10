@@ -5,6 +5,10 @@
         {
             "pattern": "templates/*.txt",
             "reloadServer": false
+        },
+        {
+            "pattern": "src/Adapter/Components/*.jsx",
+            "reloadServer": false
         }
     ]
 }
