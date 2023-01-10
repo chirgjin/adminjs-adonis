@@ -1,12 +1,13 @@
 import { LucidRecord, Property } from '.'
 import { getEnumValue } from '../helpers'
 import { inject } from '@adonisjs/core/build/standalone'
-import {
+import AdminJS, {
     BaseResource as BaseAdminResource,
     ErrorTypeEnum,
     Filter,
     ParamsType,
     PropertyErrors,
+    ResourceOptions,
     ValidationError,
 } from 'adminjs'
 import { DateTime } from 'luxon'
@@ -17,6 +18,8 @@ import type {
     LucidModel,
     ModelQueryBuilderContract,
 } from '@ioc:Adonis/Lucid/Orm'
+
+import { components } from './Components'
 
 /**
  * Resource adapter for AdminJS
@@ -327,5 +330,44 @@ export class BaseResource extends BaseAdminResource {
         const object = await this.model.find(id)
 
         await object?.delete()
+    }
+
+    /**
+     * Helper used internally by adminjs to assign decorator to this resource.
+     * In order to add support for file attachments, we update the options property
+     * to override the components which are rendered so that proper file in displayed
+     */
+    public assignDecorator(
+        admin: AdminJS,
+        options?: ResourceOptions | undefined
+    ): void {
+        const finalOptions: ResourceOptions = options || {}
+
+        finalOptions.properties = finalOptions.properties || {}
+
+        for (const property of this.properties()) {
+            if (
+                property.isAttachment &&
+                !finalOptions.properties[property.path()]
+            ) {
+                finalOptions.properties[property.path()] = {
+                    components: {
+                        edit: components.FileInput,
+                        list: components.ListUrl,
+                        show: components.ShowUrl,
+                    },
+                }
+
+                if (property.attachmentOptions?.extnames) {
+                    finalOptions.properties[property.path()].props = {
+                        accept: property.attachmentOptions?.extnames
+                            .map((ext) => `.${ext}`)
+                            .join(','),
+                    }
+                }
+            }
+        }
+
+        return super.assignDecorator(admin, finalOptions)
     }
 }
