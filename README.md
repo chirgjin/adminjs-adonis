@@ -9,15 +9,15 @@ Adapter & Plugin package to use [AdminJS](https://adminjs.co/) with [AdonisJS](h
 ```bash
 # using npm:
 
-npm install --save adonisjs-admin adminjs
+npm install --save adminjs-adonis adminjs
 
 # or using yarn:
-yarn add adminjs-admin adminjs
+yarn add adminjs-adonis adminjs
 ```
 
 After this, run:
 ```bash
-node ace configure adonisjs-admin
+node ace configure adminjs-adonis
 ```
 
 ### Configuration
