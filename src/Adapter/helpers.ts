@@ -18,7 +18,11 @@ export function getAdminColumnOptions(model: LucidModel, columnKey: string) {
     return {
         name: providedOptions?.name ?? columnOptions.columnName,
         position: providedOptions?.position ?? 1,
-        type: providedOptions?.type || columnOptions.meta?.type,
+        // Forcibly changed type to string when enum is provided
+        // because internally we only use string keys of enum when communicating with frontend
+        type: providedOptions?.enum
+            ? 'string'
+            : providedOptions?.type || columnOptions.meta?.type,
         visible: providedOptions?.visible ?? true,
         editable: providedOptions?.editable ?? !columnOptions.isPrimary,
         unique: providedOptions?.unique ?? columnOptions.isPrimary,
