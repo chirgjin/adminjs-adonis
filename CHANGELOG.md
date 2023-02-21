@@ -1,3 +1,11 @@
+## 1.2.0 (2023-02-21)
+
+* refact: add type as string for enum ([e649573](https://github.com/chirgjin/adminjs-adonis/commit/e649573))
+* :book: update documentation ([7d98651](https://github.com/chirgjin/adminjs-adonis/commit/7d98651))
+* docs: changelog for v1.1.1 ([8ba2a3a](https://github.com/chirgjin/adminjs-adonis/commit/8ba2a3a))
+
+
+
 ## <small>1.1.1 (2023-01-10)</small>
 
 * fix: disable source maps ([87004e2](https://github.com/chirgjin/adminjs-adonis/commit/87004e2))
