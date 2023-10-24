@@ -100,7 +100,7 @@ export async function withLogin(
 
         const { email, password } = ctx.request.body()
 
-        const user = config.auth.authenticate(email, password)
+        const user = await Promise.resolve(config.auth.authenticate(email, password))
 
         if (user) {
             ;(ctx as any).session.put('adminUser', { email, password })
