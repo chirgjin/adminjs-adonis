@@ -5,6 +5,10 @@ import type { PluginConfig } from '@ioc:Adonis/Addons/AdminJS'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import type { RouterContract } from '@ioc:Adonis/Core/Route'
 
+import { AuthMiddleWare } from './authenticate/authMiddleware'
+import { withLogin } from './authenticate/login'
+import { withLogout } from './authenticate/logout'
+
 @inject([null, null, 'Adonis/Core/Route'])
 export class Router {
     constructor(
@@ -18,11 +22,12 @@ export class Router {
      */
     public createRouteHandler(route: RouterType['routes'][number]) {
         return async (ctx: HttpContextContract) => {
+            const user = (ctx as any).session.get('adminUser') // if session plugin is installed then get user from it
             const controller = new route.Controller(
                 {
                     admin: this.admin,
                 },
-                (ctx as any).auth?.user // if auth plugin is installed then get user from it
+                user
             )
 
             const html = await controller[route.action](
@@ -76,6 +81,32 @@ export class Router {
                         this.createRouteHandler(route)
                     )
                 })
+            })
+            .prefix(this.config.routePrefix || '/')
+            .middleware(this.config.middlewares || [])
+    }
+
+    public buildAuthenticatedRoutes() {
+        if (!this.config.enabled) {
+            return
+        }
+
+        this.route
+            .group(() => {
+                AdminRouter.assets.forEach((asset) => {
+                    this.route.get(asset.path, this.createAssetHandler(asset))
+                })
+
+                AdminRouter.routes.forEach((route) => {
+                    this.route[route.method.toLowerCase()](
+                        route.path.replace(/\{/g, ':').replace(/\}/g, ''),
+                        this.createRouteHandler(route)
+                    ).middleware([AuthMiddleWare(this.config.auth.loginPath || this.admin.options.loginPath)])
+                })
+
+                withLogin(this.route, this.config, this.admin)
+
+                withLogout(this.route, this.config, this.admin)
             })
             .prefix(this.config.routePrefix || '/')
             .middleware(this.config.middlewares || [])

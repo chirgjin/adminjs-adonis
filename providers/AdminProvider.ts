@@ -120,7 +120,11 @@ export default class AdminProvider {
                     [admin, config.plugin]
                 )
 
-                router.buildRoutes()
+                if (config.plugin.auth.enabled) {
+                    router.buildAuthenticatedRoutes()
+                } else {
+                    router.buildRoutes()
+                }
             }
         )
     }
