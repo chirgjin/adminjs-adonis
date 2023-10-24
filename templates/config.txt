@@ -21,6 +21,57 @@ export const config: AdminConfig = {
          * Middlewares which are applied on all the routes of admin panel
          */
         middlewares: [],
+        /**
+         * Authentication options for the admin panel.
+         */
+        auth: {
+            /**
+             * Authentication enabled/disabled flag.
+             * When set to true, the authentication is enabled. When set to false, it's disabled.
+            */
+            enabled: true,
+
+            /**
+             * Maximum number of login retries allowed.
+             * The user is locked out after exceeding this limit.
+             */
+            maxRetries: 5,
+
+            /**
+             * Duration (in seconds) for which a user is locked out after exceeding the max retries.
+             */
+            duration: 60,
+
+            /**
+             * Optional login path for authentication.
+             * If not provided, a default path is used.
+             */
+            loginPath: "/admin/login",
+
+            /**
+             * Optional logout path for authentication.
+             * If not provided, a default path is used.
+             */
+            logoutPath: "/admin/logout",
+
+            /**
+             * Function for authenticating a user.
+             * This function takes an email and password as parameters and returns
+             * a user object if authentication is successful or null if it fails.
+             *
+             * @param email - The user's email address for authentication.
+             * @param password - The user's password for authentication.
+             * @returns A user object if authentication is successful, or null if it fails.
+             */
+            authenticate: (email, password) => {
+                if (email == "admin@admin.com" && password == "admin12345") {
+                    return { email, password }
+                }
+                return null
+            }
+
+        }
+
     },
     /**
      * Adapter refers to the database interaction part of AdminJS

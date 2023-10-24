@@ -10,27 +10,27 @@ declare module '@ioc:Adonis/Addons/AdminJS' {
      *
      * If you disable plugin then you'll have to manually handle the routing
      */
-    export type PluginConfig =
-        | {
-              /**
-               * Whether to enable plugin or not
-               */
-              enabled: false
-          }
-        | {
-              /**
-               * Whether to enable plugin or not
-               */
-              enabled: true
-              /**
-               * Base route on which your admin panel resides.
-               */
-              routePrefix?: string
-              /**
-               * Middlewares which are applied on all the routes of admin panel
-               */
-              middlewares?: string[]
-          }
+    export type PluginConfig = {
+        /**
+         * Whether to enable the plugin or not.
+         */
+        enabled: true
+
+        /**
+         * Base route on which your admin panel resides.
+         */
+        routePrefix?: string
+
+        /**
+         * Middlewares that are applied to all routes of the admin panel.
+         */
+        middlewares?: string[]
+
+        /**
+         * Authentication options for the admin panel.
+         */
+        auth: AuthOptions
+    }
 
     export class Router {
         protected admin: AdminJS
@@ -53,5 +53,10 @@ declare module '@ioc:Adonis/Addons/AdminJS' {
          * Helper function to build routes for an adminjs instance
          */
         public buildRoutes(): void
+
+        /**
+         * Helper function to build authenticated routes for an adminjs instance
+         */
+        public builAuthenticateddRoutes(): void
     }
 }
